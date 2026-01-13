@@ -5,8 +5,10 @@ import { useMutation } from "@tanstack/react-query";
 import { toast } from "@/client/hooks/use-toast";
 import { axios } from "@/client/libs/axios";
 
-export const printResume = async (data: { id: string }) => {
-  const response = await axios.get<UrlDto>(`/resume/print/${data.id}`);
+export const printResume = async (data: { id: string; format?: "A4" | "Letter" }) => {
+  const url = data.format ? `/resume/print/${data.id}?format=${data.format}` : `/resume/print/${data.id}`;
+
+  const response = await axios.get<UrlDto>(url);
 
   return response.data;
 };

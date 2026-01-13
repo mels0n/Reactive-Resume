@@ -23,7 +23,7 @@ export class ResumeService {
     private readonly prisma: PrismaService,
     private readonly printerService: PrinterService,
     private readonly storageService: StorageService,
-  ) {}
+  ) { }
 
   async create(userId: string, createResumeDto: CreateResumeDto) {
     const { name, email, picture } = await this.prisma.user.findUniqueOrThrow({
@@ -142,8 +142,8 @@ export class ResumeService {
     return this.prisma.resume.delete({ where: { userId_id: { userId, id } } });
   }
 
-  async printResume(resume: ResumeDto, userId?: string) {
-    const url = await this.printerService.printResume(resume);
+  async printResume(resume: ResumeDto, userId?: string, format?: "A4" | "Letter") {
+    const url = await this.printerService.printResume(resume, format);
 
     // Update statistics: increment the number of downloads by 1
     if (!userId) {

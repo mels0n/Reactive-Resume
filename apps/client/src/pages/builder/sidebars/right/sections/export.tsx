@@ -1,8 +1,21 @@
 import { t } from "@lingui/macro";
 import { CircleNotchIcon, FileJsIcon, FilePdfIcon } from "@phosphor-icons/react";
-import { buttonVariants, Card, CardContent, CardDescription, CardTitle } from "@reactive-resume/ui";
+import {
+  buttonVariants,
+  Card,
+  CardContent,
+  CardDescription,
+  CardTitle,
+  Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@reactive-resume/ui";
 import { cn } from "@reactive-resume/utils";
 import { saveAs } from "file-saver";
+import { useState } from "react";
 
 import { usePrintResume } from "@/client/services/resume/print";
 import { useResumeStore } from "@/client/stores/resume";
@@ -24,10 +37,11 @@ const openInNewTab = (url: string) => {
 
 export const ExportSection = () => {
   const { printResume, loading } = usePrintResume();
+  const [format, setFormat] = useState<"web" | "A4" | "Letter">("web");
 
   const onPdfExport = async () => {
     const { resume } = useResumeStore.getState();
-    const { url } = await printResume({ id: resume.id });
+    const { url } = await printResume({ id: resume.id, format: format === "web" ? undefined : format });
 
     openInNewTab(url);
   };
@@ -42,6 +56,20 @@ export const ExportSection = () => {
       </header>
 
       <main className="grid gap-y-4">
+        <div className="space-y-1.5">
+          <Label htmlFor="format">{t`Format`}</Label>
+          <Select value={format} onValueChange={(value) => setFormat(value as "web")}>
+            <SelectTrigger id="format">
+              <SelectValue placeholder={t`Select a format`} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="web">Web (Continuous)</SelectItem>
+              <SelectItem value="A4">A4 (Print)</SelectItem>
+              <SelectItem value="Letter">Letter (Print)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
         <Card
           className={cn(
             buttonVariants({ variant: "ghost" }),

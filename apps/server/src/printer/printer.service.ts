@@ -51,10 +51,10 @@ export class PrinterService {
     return version;
   }
 
-  async printResume(resume: ResumeDto) {
+  async printResume(resume: ResumeDto, format?: "A4" | "Letter") {
     const start = performance.now();
 
-    const url = await retry<string | undefined>(() => this.generateResume(resume), {
+    const url = await retry<string | undefined>(() => this.generateResume(resume, format), {
       retries: 3,
       randomize: true,
       onRetry: (_, attempt) => {
@@ -90,7 +90,7 @@ export class PrinterService {
     return url;
   }
 
-  async generateResume(resume: ResumeDto) {
+  async generateResume(resume: ResumeDto, format?: "A4" | "Letter") {
     try {
       const browser = await this.getBrowser();
       const page = await browser.newPage();
@@ -124,6 +124,22 @@ export class PrinterService {
         });
       }
 
+      // If format is not provided (Web), merge all pages into one to ensure continuous scrolling
+      if (!format) {
+        const originalLayout = resume.data.metadata.layout;
+        const mergedPage = originalLayout.reduce(
+          (acc, page) => {
+            return [
+              [...acc[0], ...page[0]],
+              [...acc[1], ...page[1]],
+            ];
+          },
+          [[], []] as string[][],
+        );
+
+        resume.data.metadata.layout = [mergedPage];
+      }
+
       // Set the data of the resume to be printed in the browser's session storage
       const numberPages = resume.data.metadata.layout.length;
 
@@ -141,19 +157,10 @@ export class PrinterService {
 
       const pagesBuffer: Buffer[] = [];
 
-      const processPage = async (index: number) => {
-        const pageElement = await page.$(`[data-page="${index}"]`);
-        // eslint-disable-next-line unicorn/no-await-expression-member
-        const width = (await (await pageElement?.getProperty("scrollWidth"))?.jsonValue()) ?? 0;
-        // eslint-disable-next-line unicorn/no-await-expression-member
-        const height = (await (await pageElement?.getProperty("scrollHeight"))?.jsonValue()) ?? 0;
-
-        const temporaryHtml = await page.evaluate((element: HTMLDivElement) => {
-          const clonedElement = element.cloneNode(true) as HTMLDivElement;
-          const temporaryHtml_ = document.body.innerHTML;
-          document.body.innerHTML = clonedElement.outerHTML;
-          return temporaryHtml_;
-        }, pageElement);
+      if (format) {
+        // -----------------------------------------------------------------------------------------
+        // Printable PDF (A4 / Letter) - Standard Page Sizes
+        // -----------------------------------------------------------------------------------------
 
         // Apply custom CSS, if enabled
         const css = resume.data.metadata.css;
@@ -166,18 +173,100 @@ export class PrinterService {
           }, css.value);
         }
 
-        const uint8array = await page.pdf({ width, height, printBackground: true });
+        // Inject CSS to scale and center content, creating safe margins without layout shifts
+        await page.addStyleTag({
+          content: `
+            [data-page] > div {
+              transform: scale(0.9);
+              transform-origin: center center;
+              width: 100%;
+            }
+
+            html,
+            body,
+            #root {
+              overflow: visible !important;
+              height: auto !important;
+            }
+
+            [data-page] {
+              break-after: page;
+              page-break-after: always;
+            }
+
+            [data-page]:last-child {
+              break-after: auto;
+              page-break-after: auto;
+            }
+          `,
+
+
+        });
+
+        const uint8array = await page.pdf({
+          format,
+          printBackground: true,
+        });
         const buffer = Buffer.from(uint8array);
         pagesBuffer.push(buffer);
+      } else {
+        // -----------------------------------------------------------------------------------------
+        // Web PDF (Continuous) - Custom Page Size + Buffer Fix
+        // -----------------------------------------------------------------------------------------
 
-        await page.evaluate((temporaryHtml_: string) => {
-          document.body.innerHTML = temporaryHtml_;
-        }, temporaryHtml);
-      };
+        const processPage = async (index: number) => {
+          const pageElement = await page.$(`[data-page="${index}"]`);
+          const width = (await (await pageElement?.getProperty("scrollWidth"))?.jsonValue()) ?? 0;
 
-      // Loop through all the pages and print them, by first displaying them, printing the PDF and then hiding them back
-      for (let index = 1; index <= numberPages; index++) {
-        await processPage(index);
+          const temporaryHtml = await page.evaluate((element: HTMLDivElement) => {
+            const clonedElement = element.cloneNode(true) as HTMLDivElement;
+            const temporaryHtml_ = document.body.innerHTML;
+            document.body.innerHTML = clonedElement.outerHTML;
+            return temporaryHtml_;
+          }, pageElement);
+
+          // Apply custom CSS, if enabled
+          const css = resume.data.metadata.css;
+
+          if (css.visible) {
+            await page.evaluate((cssValue: string) => {
+              const styleTag = document.createElement("style");
+              styleTag.textContent = cssValue;
+              document.head.append(styleTag);
+            }, css.value);
+          }
+
+          // Calculate height of the isolated content + buffer
+          // eslint-disable-next-line unicorn/no-await-expression-member
+          const bodyHeight = await page.evaluate(async () => {
+            // Wait for any layout shifts
+            await new Promise((resolve) => setTimeout(resolve, 100));
+            // Get precise height of the content container
+            // Get precise height of the content container
+            const element = document.body.firstElementChild;
+            if (!element) return document.body.scrollHeight;
+            return Math.max(element.getBoundingClientRect().height, document.body.scrollHeight);
+          });
+
+          const heightBuffer = 20;
+
+          const uint8array = await page.pdf({
+            width,
+            height: bodyHeight + heightBuffer,
+            printBackground: true,
+          });
+          const buffer = Buffer.from(uint8array);
+          pagesBuffer.push(buffer);
+
+          await page.evaluate((temporaryHtml_: string) => {
+            document.body.innerHTML = temporaryHtml_;
+          }, temporaryHtml);
+        };
+
+        // Loop through all the pages and print them, by first displaying them, printing the PDF and then hiding them back
+        for (let index = 1; index <= numberPages; index++) {
+          await processPage(index);
+        }
       }
 
       // Using 'pdf-lib', merge all the pages from their buffers into a single PDF
@@ -185,8 +274,8 @@ export class PrinterService {
 
       for (const element of pagesBuffer) {
         const page = await PDFDocument.load(element);
-        const [copiedPage] = await pdf.copyPages(page, [0]);
-        pdf.addPage(copiedPage);
+        const copiedPages = await pdf.copyPages(page, page.getPageIndices());
+        copiedPages.forEach((page) => pdf.addPage(page));
       }
 
       // Save the PDF to storage and return the URL to download the resume
