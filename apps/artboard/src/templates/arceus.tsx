@@ -18,7 +18,7 @@ import type {
 import type { Education as EducationType, Experience as ExperienceType, Volunteer as VolunteerType } from "@reactive-resume/schema";
 import { cn, isEmptyString, isUrl, sanitize } from "@reactive-resume/utils";
 import get from "lodash.get";
-import { Fragment } from "react";
+import { Fragment, useLayoutEffect, useRef, useState } from "react";
 
 import { BrandIcon } from "../components/brand-icon";
 import { Picture } from "../components/picture";
@@ -91,89 +91,85 @@ const Header = () => {
 
     return (
         <div className="flex flex-col space-y-4">
-            {/* Row 1: Name Centered (and Picture) */}
-            {/* Row 1: Name Centered, Picture Left Aligned */}
-            <div className="relative flex items-center justify-center border-b pb-2 min-h-[60px]">
-                <div className="absolute left-0 top-0 bottom-0 flex items-center">
-                    <Picture className="!max-w-[48px]" />
-                </div>
-                <div className="text-2xl font-bold">{basics.name}</div>
+            {/* Row 1: Name Centered */}
+            <div className="text-center">
+                <div className="text-3xl font-bold uppercase tracking-widest text-primary">{basics.name}</div>
             </div>
 
-            {/* Split Columns */}
-            <div className="grid grid-cols-2 gap-4 w-full">
-                {/* Left Column: Aligned Left */}
-                <div className="flex flex-col items-start space-y-1.5 text-sm">
-                    {/* Row 2: Address */}
-                    {basics.location && (
-                        <div className="flex items-center gap-x-1.5">
-                            <i className="ph ph-bold ph-map-pin text-primary" />
-                            <div>{basics.location}</div>
-                        </div>
-                    )}
-
-                    {/* Row 3: Website | Custom Field 1 */}
-                    <div className="flex items-center gap-x-2">
-                        <Link url={basics.url} />
-
-                        {basics.customFields[0] && (
-                            <div className="flex items-center gap-x-1.5">
-                                <i className={cn(`ph ph-bold ph-${basics.customFields[0].icon}`, "text-primary")} />
-                                {isUrl(basics.customFields[0].value) ? (
-                                    <a href={basics.customFields[0].value} target="_blank" rel="noreferrer noopener nofollow">
-                                        {basics.customFields[0].name || basics.customFields[0].value}
-                                    </a>
-                                ) : (
-                                    <span>{[basics.customFields[0].name, basics.customFields[0].value].filter(Boolean).join(": ")}</span>
-                                )}
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                {/* Right Column: Aligned Right */}
-                <div className="flex flex-col items-end space-y-1.5 text-sm text-right">
-                    {/* Row 2: Phone Number */}
-                    {basics.phone && (
-                        <div className="flex items-center gap-x-1.5">
-                            <a href={`tel:${basics.phone}`} target="_blank" rel="noreferrer">
-                                {basics.phone}
-                            </a>
-                            <i className="ph ph-bold ph-phone text-primary" />
-                        </div>
-                    )}
-
-                    {/* Row 3: Email */}
+            {/* Row 2: Contact Info */}
+            <div className="flex items-end justify-between border-b-2 border-primary pb-2 text-sm">
+                {/* Left: Email & Odd Custom Fields */}
+                <div className="flex flex-1 flex-col items-start text-left">
                     {basics.email && (
-                        <div className="flex items-center gap-x-1.5">
-                            <a href={`mailto:${basics.email}`} target="_blank" rel="noreferrer">
-                                {basics.email}
-                            </a>
-                            <i className="ph ph-bold ph-at text-primary" />
-                        </div>
+                        <a href={`mailto:${basics.email}`}>
+                            {basics.email}
+                        </a>
                     )}
+                    {basics.customFields.map((item, index) => {
+                        if (index % 2 === 0) return null; // Skip even indices (Right side)
+
+                        return (
+                            <div key={item.id}>
+                                <a
+                                    href={item.value}
+                                    target="_blank"
+                                    rel="noreferrer noopener nofollow"
+                                >
+                                    {item.name || item.value}
+                                </a>
+                            </div>
+                        );
+                    })}
+                </div>
+
+                {/* Center: Location & Phone */}
+                <div className="flex flex-col items-center justify-center text-center">
+                    {basics.location && <div>{basics.location}</div>}
+                    {basics.phone && <a href={`tel:${basics.phone}`}>{basics.phone}</a>}
+                </div>
+
+                {/* Right: Website & Even Custom Fields */}
+                <div className="flex flex-1 flex-col items-end text-right">
+                    {isUrl(basics.url.href) && (
+                        <a
+                            href={basics.url.href}
+                            target="_blank"
+                            rel="noreferrer noopener nofollow"
+                        >
+                            {basics.url.label || basics.url.href}
+                        </a>
+                    )}
+                    {basics.customFields.map((item, index) => {
+                        if (index % 2 !== 0) return null; // Skip odd indices (Left side)
+
+                        return (
+                            <div key={item.id}>
+                                <a
+                                    href={item.value}
+                                    target="_blank"
+                                    rel="noreferrer noopener nofollow"
+                                >
+                                    {item.name || item.value}
+                                </a>
+                            </div>
+                        );
+                    })}
                 </div>
             </div>
 
-            {/* Row 5 & 6: Headline and Custom Field 2 (Grouped for tighter spacing) */}
-            <div className="flex flex-col space-y-1 text-center">
-                <div className="text-base">{basics.headline}</div>
-                {basics.tagline && <div className="text-sm font-normal text-center">{basics.tagline}</div>}
-
-                {basics.customFields[1] && (
-                    <div className="flex justify-center text-sm">
-                        <div className="flex items-center gap-x-1.5">
-                            <i className={cn(`ph ph-bold ph-${basics.customFields[1].icon}`, "text-primary")} />
-                            {isUrl(basics.customFields[1].value) ? (
-                                <a href={basics.customFields[1].value} target="_blank" rel="noreferrer noopener nofollow">
-                                    {basics.customFields[1].name || basics.customFields[1].value}
-                                </a>
-                            ) : (
-                                <span>{[basics.customFields[1].name, basics.customFields[1].value].filter(Boolean).join(": ")}</span>
-                            )}
-                        </div>
+            {/* Row 3: Headline & Tagline */}
+            <div className="relative py-3 text-center">
+                <div className="absolute inset-0 bg-primary opacity-10" />
+                <div className="relative">
+                    <div className="text-xl font-bold uppercase tracking-widest text-primary">
+                        {basics.headline}
                     </div>
-                )}
+                    {basics.tagline && (
+                        <div className="mt-1 text-base font-bold text-primary/80">
+                            {basics.tagline}
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );
@@ -223,15 +219,20 @@ const Section = <T,>({
     keywordSeparator = ", ",
     hideTitle = false,
     containerClassName,
-}: SectionProps<T>) => {
+    itemsClassName,
+}: SectionProps<T> & { itemsClassName?: string }) => {
     if (!section.visible || section.items.filter((item) => item.visible).length === 0) return null;
 
     return (
         <section id={section.id} className={cn("grid", containerClassName)}>
-            {!!section.name && !hideTitle && <h4 className="mb-2 text-center text-sm font-bold">{section.name}</h4>}
+            {!!section.name && !hideTitle && (
+                <h4 className="mb-2 text-center text-xl font-bold uppercase tracking-widest">
+                    {section.name}
+                </h4>
+            )}
 
             <div
-                className="grid gap-x-6 gap-y-3"
+                className={cn("grid gap-x-6 gap-y-3", itemsClassName)}
                 style={{ gridTemplateColumns: `repeat(${section.columns}, 1fr)` }}
             >
                 {section.items
@@ -294,20 +295,20 @@ const Experience = () => {
     return (
         <Section<ExperienceType> section={section} urlKey="url" summaryKey="summary">
             {(item) => (
-                <div className="flex items-start justify-between">
-                    <div className="text-left">
+                <div className="flex flex-col">
+                    <div className="flex items-center text-left">
                         <LinkedEntity
                             name={item.company}
                             url={item.url}
                             separateLinks={section.separateLinks}
-                            className="font-bold"
+                            className="text-primary uppercase font-bold"
                         />
-                        <div>{item.position}</div>
+                        {item.location && <span className="text-foreground normal-case">, {item.location}</span>}
                     </div>
 
-                    <div className="shrink-0 text-right">
+                    <div className="flex items-center justify-between">
+                        <div className="font-bold">{item.position}</div>
                         <div className="font-bold">{item.date}</div>
-                        <div>{item.location}</div>
                     </div>
                 </div>
             )}
@@ -319,26 +320,62 @@ const Education = () => {
     const section = useArtboardStore((state) => state.resume.sections.education);
 
     return (
-        <Section<EducationType> section={section} urlKey="url" summaryKey="summary">
-            {(item) => (
-                <div className="flex items-start justify-between">
-                    <div className="text-left">
-                        <LinkedEntity
-                            name={item.institution}
-                            url={item.url}
-                            separateLinks={section.separateLinks}
-                            className="font-bold"
-                        />
-                        <div>{item.area}</div>
-                        <div>{item.score}</div>
-                    </div>
+        <Section<EducationType> section={section} urlKey="url" itemsClassName="gap-y-0">
+            {(item) => {
+                const area = item.area;
+                const studyType = item.studyType;
+                const institution = item.institution;
+                const summary = item.summary;
+                const date = item.date;
 
-                    <div className="shrink-0 text-right">
-                        <div className="font-bold">{item.date}</div>
-                        <div>{item.studyType}</div>
+                const InstitutionContent = () => {
+                    if (!section.separateLinks && isUrl(item.url.href)) {
+                        return (
+                            <a
+                                href={item.url.href}
+                                target="_blank"
+                                rel="noreferrer noopener nofollow"
+                            >
+                                {institution}
+                                <i className="ph ph-bold ph-globe ml-1 text-primary" />
+                            </a>
+                        );
+                    }
+                    return <span>{institution}</span>;
+                };
+
+                const fields = [
+                    { value: area, content: area },
+                    { value: studyType, content: studyType },
+                    {
+                        value: institution,
+                        content: <InstitutionContent />,
+                    },
+                    {
+                        value: summary,
+                        content: summary ? (
+                            <span
+                                dangerouslySetInnerHTML={{ __html: sanitize(summary) }}
+                                className="[&_p]:inline"
+                            />
+                        ) : null
+                    },
+                    { value: date, content: date },
+                ].filter((f) => !isEmptyString(f.value));
+
+                return (
+                    <div className="text-center leading-relaxed">
+                        {fields.map((field, index) => (
+                            <Fragment key={index}>
+                                <span className={cn(index === 0 && "font-bold")}>
+                                    {field.content}
+                                </span>
+                                {index < fields.length - 1 && <span>, </span>}
+                            </Fragment>
+                        ))}
                     </div>
-                </div>
-            )}
+                );
+            }}
         </Section>
     );
 };
@@ -389,30 +426,106 @@ const Certifications = () => {
     );
 };
 
+const OptimizedKeywords = ({ keywords }: { keywords: string[] }) => {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [lines, setLines] = useState<string[][]>([]);
+
+    useLayoutEffect(() => {
+        if (!containerRef.current) return;
+
+        const container = containerRef.current;
+        const computeLayout = () => {
+            const containerWidth = container.getBoundingClientRect().width;
+            if (containerWidth === 0) return;
+
+            const computedStyle = getComputedStyle(container);
+            const font = `${computedStyle.fontWeight} ${computedStyle.fontSize} ${computedStyle.fontFamily}`;
+
+            const canvas = document.createElement("canvas");
+            const context = canvas.getContext("2d");
+            if (!context) return;
+            context.font = font;
+
+            const separator = " | ";
+            const separatorWidth = context.measureText(separator).width;
+
+            // Measure all keywords
+            const measuredKeywords = keywords.map((k) => ({
+                text: k,
+                width: context.measureText(k).width,
+            }));
+
+            // Sort by width descending (First Fit Decreasing)
+            measuredKeywords.sort((a, b) => b.width - a.width);
+
+            const newLines: string[][] = [];
+            const lineWidths: number[] = [];
+
+            measuredKeywords.forEach(({ text, width }) => {
+                let added = false;
+
+                // Try to fit in existing lines
+                for (let i = 0; i < newLines.length; i++) {
+                    const currentWidth = lineWidths[i];
+                    // If line is not empty, add separator width
+                    const widthToAdd = (newLines[i].length > 0 ? separatorWidth : 0) + width;
+
+                    if (currentWidth + widthToAdd <= containerWidth) {
+                        newLines[i].push(text);
+                        lineWidths[i] += widthToAdd;
+                        added = true;
+                        break;
+                    }
+                }
+
+                if (!added) {
+                    newLines.push([text]);
+                    lineWidths.push(width);
+                }
+            });
+
+            setLines(newLines);
+        };
+
+        const observer = new ResizeObserver(computeLayout);
+        observer.observe(container);
+
+        // Wait for fonts to ensure accurate measurement
+        document.fonts.ready.then(computeLayout);
+
+        return () => observer.disconnect();
+    }, [keywords]);
+
+    return (
+        <div ref={containerRef} className="w-full">
+            {lines.length > 0 ? (
+                lines.map((line, index) => (
+                    <div key={index} className="whitespace-nowrap">
+                        {line.join(" | ")}
+                    </div>
+                ))
+            ) : (
+                <div className="opacity-0 pointer-events-none absolute">{keywords.join(" | ")}</div>
+            )}
+        </div>
+    );
+};
+
 const Skills = () => {
     const section = useArtboardStore((state) => state.resume.sections.skills);
 
     return (
         <Section<Skill>
             section={section}
-            levelKey="level"
             className="text-center"
             hideTitle
         >
             {(item) => (
                 <div className="space-y-1">
-                    <div className="font-bold">{item.name}</div>
-                    <div>{item.description}</div>
-
                     {item.keywords && item.keywords.length > 0 && (
-                        <ul className="space-y-1">
-                            {item.keywords.map((keyword, index) => (
-                                <li key={index} className="flex items-center justify-start gap-x-2 text-left">
-                                    <div className="size-1 shrink-0 rounded-full bg-black" />
-                                    <span>{keyword}</span>
-                                </li>
-                            ))}
-                        </ul>
+                        <div className="text-center">
+                            <OptimizedKeywords keywords={item.keywords} />
+                        </div>
                     )}
                 </div>
             )}
