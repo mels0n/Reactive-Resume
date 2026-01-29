@@ -177,7 +177,7 @@ export class PrinterService {
         await page.addStyleTag({
           content: `
             [data-page] > div {
-              transform: scale(0.9);
+              transform: scale(0.95);
               transform-origin: center center;
               width: 100%;
             }

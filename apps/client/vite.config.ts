@@ -28,6 +28,7 @@ export default defineConfig({
         changeOrigin: true,
       },
     },
+    allowedHosts: ["host.docker.internal"],
   },
 
   optimizeDeps: {

@@ -100,60 +100,95 @@ const Header = () => {
             <div className="flex items-end justify-between border-b-2 border-primary pb-2 text-sm">
                 {/* Left: Email & Odd Custom Fields */}
                 <div className="flex flex-1 flex-col items-start text-left">
-                    {basics.email && (
-                        <a href={`mailto:${basics.email}`}>
-                            {basics.email}
-                        </a>
-                    )}
-                    {basics.customFields.map((item, index) => {
-                        if (index % 2 === 0) return null; // Skip even indices (Right side)
+                    {(() => {
+                        const leftCount = (basics.email ? 1 : 0) + basics.customFields.filter((_, i) => i % 2 !== 0).length;
+                        const rightCount = (isUrl(basics.url.href) ? 1 : 0) + basics.customFields.filter((_, i) => i % 2 === 0).length;
+                        const phonePosition = leftCount > rightCount ? "right" : rightCount > leftCount ? "left" : "center";
 
                         return (
-                            <div key={item.id}>
-                                <a
-                                    href={item.value}
-                                    target="_blank"
-                                    rel="noreferrer noopener nofollow"
-                                >
-                                    {item.name || item.value}
-                                </a>
-                            </div>
+                            <>
+                                {phonePosition === "left" && basics.phone && (
+                                    <a href={`tel:${basics.phone}`}>{basics.phone}</a>
+                                )}
+                                {basics.email && (
+                                    <a href={`mailto:${basics.email}`}>
+                                        {basics.email}
+                                    </a>
+                                )}
+                                {basics.customFields.map((item, index) => {
+                                    if (index % 2 === 0) return null; // Skip even indices (Right side)
+
+                                    return (
+                                        <div key={item.id}>
+                                            <a
+                                                href={item.value}
+                                                target="_blank"
+                                                rel="noreferrer noopener nofollow"
+                                            >
+                                                {item.name || item.value}
+                                            </a>
+                                        </div>
+                                    );
+                                })}
+                            </>
                         );
-                    })}
+                    })()}
                 </div>
 
                 {/* Center: Location & Phone */}
-                <div className="flex flex-col items-center justify-center text-center">
+                <div className="flex flex-col items-center justify-center text-center self-start">
                     {basics.location && <div>{basics.location}</div>}
-                    {basics.phone && <a href={`tel:${basics.phone}`}>{basics.phone}</a>}
+                    {(() => {
+                        const leftCount = (basics.email ? 1 : 0) + basics.customFields.filter((_, i) => i % 2 !== 0).length;
+                        const rightCount = (isUrl(basics.url.href) ? 1 : 0) + basics.customFields.filter((_, i) => i % 2 === 0).length;
+                        const phonePosition = leftCount > rightCount ? "right" : rightCount > leftCount ? "left" : "center";
+
+                        if (phonePosition === "center" && basics.phone) {
+                            return <a href={`tel:${basics.phone}`}>{basics.phone}</a>;
+                        }
+                        return null;
+                    })()}
                 </div>
 
                 {/* Right: Website & Even Custom Fields */}
                 <div className="flex flex-1 flex-col items-end text-right">
-                    {isUrl(basics.url.href) && (
-                        <a
-                            href={basics.url.href}
-                            target="_blank"
-                            rel="noreferrer noopener nofollow"
-                        >
-                            {basics.url.label || basics.url.href}
-                        </a>
-                    )}
-                    {basics.customFields.map((item, index) => {
-                        if (index % 2 !== 0) return null; // Skip odd indices (Left side)
+                    {(() => {
+                        const leftCount = (basics.email ? 1 : 0) + basics.customFields.filter((_, i) => i % 2 !== 0).length;
+                        const rightCount = (isUrl(basics.url.href) ? 1 : 0) + basics.customFields.filter((_, i) => i % 2 === 0).length;
+                        const phonePosition = leftCount > rightCount ? "right" : rightCount > leftCount ? "left" : "center";
 
                         return (
-                            <div key={item.id}>
-                                <a
-                                    href={item.value}
-                                    target="_blank"
-                                    rel="noreferrer noopener nofollow"
-                                >
-                                    {item.name || item.value}
-                                </a>
-                            </div>
+                            <>
+                                {phonePosition === "right" && basics.phone && (
+                                    <a href={`tel:${basics.phone}`}>{basics.phone}</a>
+                                )}
+                                {isUrl(basics.url.href) && (
+                                    <a
+                                        href={basics.url.href}
+                                        target="_blank"
+                                        rel="noreferrer noopener nofollow"
+                                    >
+                                        {basics.url.label || basics.url.href}
+                                    </a>
+                                )}
+                                {basics.customFields.map((item, index) => {
+                                    if (index % 2 !== 0) return null; // Skip odd indices (Left side)
+
+                                    return (
+                                        <div key={item.id}>
+                                            <a
+                                                href={item.value}
+                                                target="_blank"
+                                                rel="noreferrer noopener nofollow"
+                                            >
+                                                {item.name || item.value}
+                                            </a>
+                                        </div>
+                                    );
+                                })}
+                            </>
                         );
-                    })}
+                    })()}
                 </div>
             </div>
 
