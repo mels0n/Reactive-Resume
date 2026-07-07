@@ -8,6 +8,7 @@ describe("templates metadata", () => {
 		const ids = Object.keys(templates).sort();
 		expect(ids).toEqual(
 			[
+				"arceus",
 				"azurill",
 				"bronzor",
 				"chikorita",

@@ -1,5 +1,6 @@
 import type { Template } from "@reactive-resume/schema/templates";
 import type { TemplatePage } from "../document";
+import { ArceusPage } from "./arceus/ArceusPage";
 import { AzurillPage } from "./azurill/AzurillPage";
 import { BronzorPage } from "./bronzor/BronzorPage";
 import { ChikoritaPage } from "./chikorita/ChikoritaPage";
@@ -17,6 +18,7 @@ import { RhyhornPage } from "./rhyhorn/RhyhornPage";
 import { ScizorPage } from "./scizor/ScizorPage";
 
 export const templatePages: Partial<Record<Template, TemplatePage>> = {
+	arceus: ArceusPage,
 	azurill: AzurillPage,
 	bronzor: BronzorPage,
 	chikorita: ChikoritaPage,

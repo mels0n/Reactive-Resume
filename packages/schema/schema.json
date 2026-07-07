@@ -2098,6 +2098,7 @@
 					"description": "The template to use for the resume. Determines the overall design and appearance of the resume.",
 					"type": "string",
 					"enum": [
+						"arceus",
 						"azurill",
 						"bronzor",
 						"chikorita",

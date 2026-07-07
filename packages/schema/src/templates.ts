@@ -1,6 +1,7 @@
 import z from "zod";
 
 export const templateSchema = z.enum([
+	"arceus",
 	"azurill",
 	"bronzor",
 	"chikorita",

@@ -9,4 +9,11 @@ describe("templatePages", () => {
 		expect(registry).toContain('import { ScizorPage } from "./scizor/ScizorPage";');
 		expect(registry).toContain("scizor: ScizorPage");
 	});
+
+	it("registers Arceus as a renderable template page", () => {
+		const registry = readFileSync(fileURLToPath(new URL("./index.ts", import.meta.url)), "utf8");
+
+		expect(registry).toContain('import { ArceusPage } from "./arceus/ArceusPage";');
+		expect(registry).toContain("arceus: ArceusPage");
+	});
 });

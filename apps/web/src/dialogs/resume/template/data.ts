@@ -11,6 +11,13 @@ export type TemplateMetadata = {
 };
 
 export const templates = {
+	arceus: {
+		name: "Arceus",
+		description: msg`Single-column, centered layout with a tinted headline banner, a balanced three-column contact header, and a dense packed skills block; designed for senior management and executive resumes.`,
+		imageUrl: "/templates/jpg/arceus.jpg",
+		tags: ["Single-column", "Centered", "Executive", "Management", "High-density", "Professional"],
+		sidebarPosition: "none",
+	},
 	azurill: {
 		name: "Azurill",
 		description: msg`Two-column with a bold colored sidebar and skill bars; great for creative or tech roles where visual flair is welcome.`,

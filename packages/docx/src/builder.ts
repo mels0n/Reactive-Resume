@@ -85,6 +85,7 @@ interface TemplateConfig {
 }
 
 const TEMPLATE_CONFIGS: Record<Template, TemplateConfig> = {
+	arceus: { sidebarSide: "left", sidebarBackground: "none", headerPosition: "full-width" },
 	azurill: { sidebarSide: "left", sidebarBackground: "none", headerPosition: "full-width" },
 	bronzor: { sidebarSide: "right", sidebarBackground: "none", headerPosition: "full-width" },
 	chikorita: { sidebarSide: "right", sidebarBackground: "solid", headerPosition: "main-only" },
