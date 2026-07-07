@@ -95,6 +95,13 @@ describe("basicsSchema", () => {
 		});
 		expect(result.success).toBe(true);
 	});
+
+	it("falls back to empty tagline via .catch when missing (pre-existing resumes without tagline)", () => {
+		const { tagline: _tagline, ...basicsWithoutTagline } = defaultResumeData.basics;
+		const result = basicsSchema.safeParse(basicsWithoutTagline);
+		expect(result.success).toBe(true);
+		if (result.success) expect(result.data.tagline).toBe("");
+	});
 });
 
 describe("customFieldSchema", () => {

@@ -87,7 +87,7 @@ export const basicsSchema = z.object({
 	headline: z.string().describe("The headline of the author of the resume."),
 	tagline: z
 		.string()
-		.default("")
+		.catch("")
 		.describe("The tagline of the author, displayed beneath the headline by templates that support it."),
 	email: z.string().describe("The email address of the author of the resume."),
 	phone: z.string().describe("The phone number of the author of the resume."),
