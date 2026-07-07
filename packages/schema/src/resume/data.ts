@@ -85,6 +85,10 @@ export const customFieldSchema = z.object({
 export const basicsSchema = z.object({
 	name: z.string().describe("The full name of the author of the resume."),
 	headline: z.string().describe("The headline of the author of the resume."),
+	tagline: z
+		.string()
+		.default("")
+		.describe("The tagline of the author, displayed beneath the headline by templates that support it."),
 	email: z.string().describe("The email address of the author of the resume."),
 	phone: z.string().describe("The phone number of the author of the resume."),
 	location: z.string().describe("The location of the author of the resume."),

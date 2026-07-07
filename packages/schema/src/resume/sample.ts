@@ -16,6 +16,7 @@ export const sampleResumeData: ResumeData = {
 	basics: {
 		name: "David Kowalski",
 		headline: "Game Developer | Unity & Unreal Engine Specialist",
+		tagline: "Crafting playable worlds from concept to launch.",
 		email: "david.kowalski@email.com",
 		phone: "+1 (555) 291-4756",
 		location: "Seattle, WA",
