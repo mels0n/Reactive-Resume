@@ -203,6 +203,23 @@ function buildHeader(data: ResumeData, colorHex: string, textColorHex: string): 
 		);
 	}
 
+	if (basics.tagline) {
+		paragraphs.push(
+			new Paragraph({
+				spacing: { after: 60 },
+				children: [
+					new TextRun({
+						text: basics.tagline,
+						italics: true,
+						size: bodySize,
+						font: bodyFont,
+						color: textColorHex,
+					}),
+				],
+			}),
+		);
+	}
+
 	const contactParts: (TextRun | ExternalHyperlink)[] = [];
 	const addSeparator = () => {
 		if (contactParts.length > 0) {
