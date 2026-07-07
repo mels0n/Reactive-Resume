@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getTemplatePageMinHeightStyle, getTemplatePageSize } from "./page-size";
+import { getTemplatePageMinHeightStyle, getTemplatePageSize, getTemplatePageWidth } from "./page-size";
 
 describe("getTemplatePageSize", () => {
 	it("returns 'A4' for a4 format", () => {
@@ -27,5 +27,19 @@ describe("getTemplatePageMinHeightStyle", () => {
 
 	it("returns A4-style minHeight for free-form", () => {
 		expect(getTemplatePageMinHeightStyle("free-form")).toEqual({ minHeight: 841.89 });
+	});
+});
+
+describe("getTemplatePageWidth", () => {
+	it("returns the A4 width for a4 format", () => {
+		expect(getTemplatePageWidth("a4")).toBeCloseTo(595.28, 2);
+	});
+
+	it("returns the letter width for letter format", () => {
+		expect(getTemplatePageWidth("letter")).toBe(612);
+	});
+
+	it("falls back to the A4 width for free-form (or any other) format", () => {
+		expect(getTemplatePageWidth("free-form")).toBeCloseTo(595.28, 2);
 	});
 });

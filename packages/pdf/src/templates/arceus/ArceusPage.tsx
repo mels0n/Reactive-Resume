@@ -138,6 +138,9 @@ const ArceusSkills = ({ styles }: { styles: ArceusStyles }) => {
 	const data = useRender();
 	const { metadata } = data;
 	const skills = data.sections.skills;
+	// Intentionally looser than the shared `filterItems` (which requires a non-blank `name`):
+	// once the section is visible, keyword-only items (blank name) should still contribute
+	// their keywords to the packed keyword cloud below.
 	const rawKeywords = skills.items
 		.filter((item) => !item.hidden)
 		.flatMap((item) => (item.keywords.length > 0 ? item.keywords : [item.name]))
@@ -162,6 +165,22 @@ const ArceusSkills = ({ styles }: { styles: ArceusStyles }) => {
 	);
 };
 
+/** Centered icon-over-title heading used by both the Arceus education and experience blocks. */
+const ArceusSectionHeading = ({
+	icon,
+	title,
+	styles,
+}: {
+	icon: IconName | undefined;
+	title: string;
+	styles: ArceusStyles;
+}) => (
+	<View style={{ flexDirection: "column", alignItems: "center" }}>
+		{icon && <SectionHeadingIcon name={icon} />}
+		<Heading style={styles.sectionHeading as Style}>{title}</Heading>
+	</View>
+);
+
 const ArceusEducation = ({ styles }: { styles: ArceusStyles }) => {
 	const data = useRender();
 	const education = data.sections.education;
@@ -174,10 +193,7 @@ const ArceusEducation = ({ styles }: { styles: ArceusStyles }) => {
 
 	return (
 		<View style={styles.educationBlock}>
-			<View style={{ flexDirection: "column", alignItems: "center" }}>
-				{showIcon && <SectionHeadingIcon name={icon as IconName} />}
-				<Heading style={styles.sectionHeading as Style}>{title}</Heading>
-			</View>
+			<ArceusSectionHeading icon={showIcon ? (icon as IconName) : undefined} title={title} styles={styles} />
 
 			{items.map((item) => {
 				// Reference layout: bold degree (falling back to area), then the remaining
@@ -214,10 +230,7 @@ const ArceusExperience = ({ styles }: { styles: ArceusStyles }) => {
 
 	return (
 		<View style={styles.section as Style}>
-			<View style={{ flexDirection: "column", alignItems: "center" }}>
-				{showIcon && <SectionHeadingIcon name={icon as IconName} />}
-				<Heading style={styles.sectionHeading as Style}>{title}</Heading>
-			</View>
+			<ArceusSectionHeading icon={showIcon ? (icon as IconName) : undefined} title={title} styles={styles} />
 
 			<View style={styles.experienceBlock}>
 				{items.map((item) => {

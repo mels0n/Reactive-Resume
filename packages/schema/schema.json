@@ -83,8 +83,8 @@
 					"description": "The headline of the author of the resume."
 				},
 				"tagline": {
-					"type": "string",
 					"default": "",
+					"type": "string",
 					"description": "The tagline of the author, displayed beneath the headline by templates that support it."
 				},
 				"email": {

@@ -1,9 +1,9 @@
 export type MeasureText = (text: string) => number;
 
 /**
- * Packs keywords into lines using first-fit-decreasing so no keyword is ever
- * split across lines and each line is as full as possible. Mirrors the layout
- * of the dense pipe-separated skills block in the Arceus template.
+ * Packs keywords into dense pipe-separated lines using first-fit-decreasing so no
+ * keyword is ever split across lines and each line is as full as possible. Used by
+ * templates with packed keyword blocks (for example, the Arceus skills section).
  */
 export const packKeywordLines = (
 	keywords: string[],
