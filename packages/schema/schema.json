@@ -144,7 +144,7 @@
 					"description": "The custom fields to display on the resume."
 				}
 			},
-			"required": ["name", "headline", "email", "phone", "location", "website", "customFields"],
+			"required": ["name", "headline", "tagline", "email", "phone", "location", "website", "customFields"],
 			"additionalProperties": false,
 			"description": "Basic information about the author, such as name, email, phone, location, and website"
 		},
