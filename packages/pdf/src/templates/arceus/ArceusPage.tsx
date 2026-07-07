@@ -18,14 +18,17 @@ import {
 	WebsiteContactItem,
 } from "../shared/contact-item";
 import { TemplateProvider } from "../shared/context";
-import { filterSections } from "../shared/filtering";
+import { filterItems, filterSections } from "../shared/filtering";
 import { createApproximateMeasure, packKeywordLines } from "../shared/keyword-lines";
 import { getTemplateMetrics } from "../shared/metrics";
 import { getTemplatePageMinHeightStyle, getTemplatePageSize, getTemplatePageWidth } from "../shared/page-size";
 import { hasTemplatePicture } from "../shared/picture";
-import { Bold, Heading, SectionHeadingIcon, Text } from "../shared/primitives";
+import { Bold, Heading, Link, SectionHeadingIcon, Text } from "../shared/primitives";
+import { RichText } from "../shared/rich-text";
 import { createRtlStyleHelpers } from "../shared/rtl";
+import { getInlineItemWebsiteUrl } from "../shared/section-links";
 import { Section } from "../shared/sections";
+import { hasSplitRowText } from "../shared/split-row";
 import { composeStyles, headerNameLineHeight } from "../shared/styles";
 import { getArceusHeaderLayout } from "./header-layout";
 
@@ -46,6 +49,11 @@ type ArceusStyles = Omit<TemplateStyleSlots, "page"> & {
 	skillsLine: Style;
 	educationBlock: Style;
 	educationItem: Style;
+	experienceBlock: Style;
+	experienceItem: Style;
+	experienceCompanyRow: Style;
+	experienceCompany: Style;
+	experienceSplitRow: Style;
 	sections: Style;
 };
 
@@ -75,6 +83,7 @@ export const ArceusPage = ({ page, pageIndex }: TemplatePageProps) => {
 					{sections.map((section) => {
 						if (section === "skills") return <ArceusSkills key={section} styles={styles} />;
 						if (section === "education") return <ArceusEducation key={section} styles={styles} />;
+						if (section === "experience") return <ArceusExperience key={section} styles={styles} />;
 						return <Section key={section} section={section} placement="main" />;
 					})}
 				</View>
@@ -183,6 +192,63 @@ const ArceusEducation = ({ styles }: { styles: ArceusStyles }) => {
 					</Text>
 				);
 			})}
+		</View>
+	);
+};
+
+const ArceusExperience = ({ styles }: { styles: ArceusStyles }) => {
+	const data = useRender();
+	const experience = data.sections.experience;
+	const items = filterItems(experience.items, "experience");
+	if (items.length === 0) return null;
+
+	const title = getResumeSectionTitle(data, "experience", experience.title);
+	const icon = getResumeSectionIcon(data, "experience");
+	const showIcon = Boolean(icon) && !data.metadata.page.hideSectionIcons;
+
+	return (
+		<View style={styles.section as Style}>
+			<View style={{ flexDirection: "column", alignItems: "center" }}>
+				{showIcon && <SectionHeadingIcon name={icon as IconName} />}
+				<Heading style={styles.sectionHeading as Style}>{title}</Heading>
+			</View>
+
+			<View style={styles.experienceBlock}>
+				{items.map((item) => {
+					const inlineWebsiteUrl = getInlineItemWebsiteUrl(item.website);
+					const company = <Text style={styles.experienceCompany}>{item.company.toLocaleUpperCase()}</Text>;
+
+					return (
+						<View key={item.id} style={styles.experienceItem}>
+							<View style={styles.experienceCompanyRow}>
+								{inlineWebsiteUrl ? <Link src={inlineWebsiteUrl}>{company}</Link> : company}
+								{hasSplitRowText(item.location) && <Text>{item.location}</Text>}
+							</View>
+
+							{(Boolean(item.position.trim()) || hasSplitRowText(item.period)) && (
+								<View style={styles.experienceSplitRow}>
+									{item.position.trim() && <Bold>{item.position}</Bold>}
+									{hasSplitRowText(item.period) && <Bold>{item.period}</Bold>}
+								</View>
+							)}
+
+							{item.roles.length > 0 ? (
+								item.roles.map((role) => (
+									<View key={role.id}>
+										<View style={styles.experienceSplitRow}>
+											<Bold>{role.position}</Bold>
+											<Bold>{role.period}</Bold>
+										</View>
+										<RichText>{role.description}</RichText>
+									</View>
+								))
+							) : (
+								<RichText>{item.description}</RichText>
+							)}
+						</View>
+					);
+				})}
+			</View>
 		</View>
 	);
 };
@@ -323,6 +389,29 @@ const useArceusTemplate = (): ArceusTemplate => {
 			},
 			educationItem: {
 				textAlign: "center",
+			},
+			experienceBlock: {
+				flexDirection: "column",
+				rowGap: metrics.itemGapY,
+			},
+			experienceItem: {
+				flexDirection: "column",
+				rowGap: metrics.gapY(0.125),
+			},
+			experienceCompanyRow: {
+				flexDirection: r.row,
+				justifyContent: "space-between",
+				alignItems: "flex-end",
+			},
+			experienceCompany: {
+				color: primary,
+				fontWeight: bodyWeight,
+				textTransform: "uppercase",
+			},
+			experienceSplitRow: {
+				flexDirection: r.row,
+				justifyContent: "space-between",
+				alignItems: "flex-start",
 			},
 			sections: {
 				flexDirection: "column",
