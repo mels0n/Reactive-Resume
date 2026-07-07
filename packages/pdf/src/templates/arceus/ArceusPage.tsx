@@ -165,7 +165,7 @@ const ArceusSkills = ({ styles }: { styles: ArceusStyles }) => {
 const ArceusEducation = ({ styles }: { styles: ArceusStyles }) => {
 	const data = useRender();
 	const education = data.sections.education;
-	const items = education.items.filter((item) => !item.hidden);
+	const items = filterItems(education.items, "education");
 	if (items.length === 0) return null;
 
 	const title = getResumeSectionTitle(data, "education", education.title);
@@ -182,15 +182,19 @@ const ArceusEducation = ({ styles }: { styles: ArceusStyles }) => {
 			{items.map((item) => {
 				// Reference layout: bold degree (falling back to area), then the remaining
 				// fields (area, school, location) joined with commas on one centered line.
-				const primary = item.degree.trim() || item.area.trim();
-				const rest = [item.degree.trim() ? item.area.trim() : "", item.school.trim(), item.location.trim()]
-					.filter(Boolean)
-					.join(", ");
+				// Build the full ordered parts list and filter empties so no leading/trailing/
+				// double commas can appear regardless of which fields are blank.
+				const degree = item.degree.trim();
+				const area = item.area.trim();
+				const primary = degree || area;
+				const parts = [degree ? area : "", item.school.trim(), item.location.trim()].filter(Boolean);
+				const rest = parts.join(", ");
 
 				return (
 					<Text key={item.id} style={styles.educationItem}>
-						<Bold>{primary}</Bold>
-						{rest ? `, ${rest}` : ""}
+						{primary && <Bold>{primary}</Bold>}
+						{primary && rest ? ", " : ""}
+						{rest}
 					</Text>
 				);
 			})}
