@@ -53,6 +53,7 @@ type ArceusStyles = Omit<TemplateStyleSlots, "page"> & {
 	experienceItem: Style;
 	experienceCompanyRow: Style;
 	experienceCompany: Style;
+	experienceLocation: Style;
 	experienceSplitRow: Style;
 	sections: Style;
 };
@@ -137,10 +138,11 @@ const ArceusSkills = ({ styles }: { styles: ArceusStyles }) => {
 	const data = useRender();
 	const { metadata } = data;
 	const skills = data.sections.skills;
-	const keywords = skills.items
+	const rawKeywords = skills.items
 		.filter((item) => !item.hidden)
-		.flatMap((item) => [item.name, ...item.keywords])
+		.flatMap((item) => (item.keywords.length > 0 ? item.keywords : [item.name]))
 		.filter(Boolean);
+	const keywords = [...new Set(rawKeywords)];
 	if (keywords.length === 0) return null;
 
 	const metrics = getTemplateMetrics(metadata.page);
@@ -220,10 +222,12 @@ const ArceusExperience = ({ styles }: { styles: ArceusStyles }) => {
 
 					return (
 						<View key={item.id} style={styles.experienceItem}>
-							<View style={styles.experienceCompanyRow}>
+							<Text style={styles.experienceCompanyRow}>
 								{inlineWebsiteUrl ? <Link src={inlineWebsiteUrl}>{company}</Link> : company}
-								{hasSplitRowText(item.location) && <Text>{item.location}</Text>}
-							</View>
+								{hasSplitRowText(item.location) && (
+									<Text style={styles.experienceLocation}>{`, ${item.location}`}</Text>
+								)}
+							</Text>
 
 							{(Boolean(item.position.trim()) || hasSplitRowText(item.period)) && (
 								<View style={styles.experienceSplitRow}>
@@ -399,14 +403,18 @@ const useArceusTemplate = (): ArceusTemplate => {
 				rowGap: metrics.gapY(0.125),
 			},
 			experienceCompanyRow: {
-				flexDirection: r.row,
-				justifyContent: "space-between",
-				alignItems: "flex-end",
+				textAlign: r.sectionHeadingTextAlign,
+				...r.text,
 			},
 			experienceCompany: {
 				color: primary,
 				fontWeight: bodyWeight,
 				textTransform: "uppercase",
+			},
+			experienceLocation: {
+				color: foreground,
+				fontWeight: "normal",
+				textTransform: "none",
 			},
 			experienceSplitRow: {
 				flexDirection: r.row,
