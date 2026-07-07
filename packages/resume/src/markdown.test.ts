@@ -31,6 +31,17 @@ describe("buildMarkdown", () => {
 		expect(md).toContain(`_${sampleResumeData.basics.headline}_`);
 	});
 
+	it("emits the tagline as emphasis when set, and omits it when empty", () => {
+		expect(sampleResumeData.basics.tagline).toBeTruthy();
+		expect(md).toContain(`_${sampleResumeData.basics.tagline}_`);
+
+		const withoutTagline = buildMarkdown(
+			getResumeExportData({ ...sampleResumeData, basics: { ...sampleResumeData.basics, tagline: "" } }, "resume"),
+			resolveTitle,
+		);
+		expect(withoutTagline).not.toContain(`_${sampleResumeData.basics.tagline}_`);
+	});
+
 	it("renders resolved section headings as H2", () => {
 		expect(md).toContain("## Experience");
 	});

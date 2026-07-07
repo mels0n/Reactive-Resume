@@ -54,6 +54,7 @@ function renderHeader(basics: ResumeData["basics"]): string[] {
 	const blocks: string[] = [];
 	if (basics.name) blocks.push(`# ${basics.name}`);
 	if (basics.headline) blocks.push(`_${basics.headline}_`);
+	if (basics.tagline) blocks.push(`_${basics.tagline}_`);
 
 	const contact = [
 		basics.email,

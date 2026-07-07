@@ -270,6 +270,7 @@ export function ResumeAccessibleText({ data }: ResumeAccessibleTextProps) {
 			<header>
 				{basics.name ? <h1>{basics.name}</h1> : null}
 				{basics.headline ? <p>{basics.headline}</p> : null}
+				{basics.tagline ? <p>{basics.tagline}</p> : null}
 				{contact.length > 0 ? (
 					<ul>
 						{contact.map((entry, index) => (
