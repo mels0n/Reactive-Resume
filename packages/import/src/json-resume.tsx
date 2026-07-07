@@ -188,6 +188,7 @@ function convertJSONResume(jsonResume: JSONResume): ResumeData {
 		result.basics = {
 			name: basics.name || "",
 			headline: basics.label || "",
+			tagline: "",
 			email: basics.email || "",
 			phone: basics.phone || "",
 			location: basics.location ? formatLocation(basics.location) : "",

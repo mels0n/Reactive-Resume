@@ -248,6 +248,7 @@ export function parseReactiveResumeV4JSON(json: string): ResumeData {
 			basics: {
 				name: v4Data.basics.name ?? "",
 				headline: v4Data.basics.headline ?? "",
+				tagline: "",
 				email: sanitizeEmail(v4Data.basics.email),
 				phone: v4Data.basics.phone ?? "",
 				location: v4Data.basics.location ?? "",

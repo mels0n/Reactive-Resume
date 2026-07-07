@@ -104,6 +104,29 @@ function BasicsSectionForm() {
 				)}
 			</form.Field>
 
+			<form.Field name="tagline">
+				{(field) => (
+					<FormItem hasError={field.state.meta.isTouched && field.state.meta.errors.length > 0}>
+						<FormLabel>
+							<Trans>Tagline</Trans>
+						</FormLabel>
+						<FormControl
+							render={
+								<Input
+									name={field.name}
+									value={field.state.value}
+									onBlur={field.handleBlur}
+									onChange={(e) => {
+										field.handleChange(e.target.value);
+									}}
+								/>
+							}
+						/>
+						<FormMessage errors={field.state.meta.errors} />
+					</FormItem>
+				)}
+			</form.Field>
+
 			<form.Field name="email">
 				{(field) => (
 					<FormItem hasError={field.state.meta.isTouched && field.state.meta.errors.length > 0}>
